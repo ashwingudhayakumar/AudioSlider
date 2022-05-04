@@ -76,7 +76,7 @@
         function audioRangeSliderAttributeSet(element, backgroundColor, position, paddingTop, paddingBottom, left, top) {
             element.style.backgroundColor = backgroundColor;
             element.style.position = position;
-            element.style.padddingTop = paddingTop;
+            element.style.paddingTop = paddingTop;
             element.style.paddingBottom = paddingBottom;
             element.style.left = left;
             element.style.top = top;
@@ -108,13 +108,15 @@
 
         const minRangeOfAudioSlider = createElement('p');
         minRangeOfAudioSlider.setAttribute("draggable", true);
-        minRangeOfAudioSlider.innerText = "1";
+        minRangeOfAudioSlider.innerText = "";
+        minRangeOfAudioSlider.style.width="10px";
         minRangeOfAudioSlider.setAttribute("id", 'minimumRangeOfAudioSlider');
         appendTo(audioSliderBase, minRangeOfAudioSlider);
 
         const maxRangeOfAudioSlider = createElement('p');
         maxRangeOfAudioSlider.setAttribute("draggable", true);
-        maxRangeOfAudioSlider.innerText = "2";
+        maxRangeOfAudioSlider.innerText = "";
+        maxRangeOfAudioSlider.style.width="10px";
         maxRangeOfAudioSlider.setAttribute("id", 'maximumRangeOfAudioSlider');
         appendTo(audioSliderBase, maxRangeOfAudioSlider);
 
@@ -155,11 +157,11 @@
             originalAudio.onloadedmetadata = function () {
 
 
-                audioBaseSliderAttributeSet(audioSliderBase, "#333", 'absolute', '4rem', '10px', '500px', '50px');
-                audioRangeSliderAttributeSet(minRangeOfAudioSlider, 'red', 'absolute', '1px', '1px', '0px', '-21px');
-                audioRangeSliderAttributeSet(maxRangeOfAudioSlider, 'red', 'absolute', '1px', '1px', '500px', '-21px');
-                labelSet(minRangeAudioLabel, 'absolute', '20px', '0px');
-                labelSet(maxRangeAudioLabel, 'absolute', '20px', '500px');
+                audioBaseSliderAttributeSet(audioSliderBase, "rgb(51 51 51 / 63%)", 'absolute', '4rem', '50px', '500px', '50px');
+                audioRangeSliderAttributeSet(minRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '0px', '-21px');
+                audioRangeSliderAttributeSet(maxRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '500px', '-21px');
+                labelSet(minRangeAudioLabel, 'absolute', '-30px', '0px');
+                labelSet(maxRangeAudioLabel, 'absolute', '-30px', '500px');
                 document.body.append(audioSliderBase);
                 minRangeAudioLabel.innerText = "0:00";
                 maxRangeAudioLabel.innerText = `${flooring(originalAudio.duration / 60)}:${flooring(originalAudio.duration % 60)}`;
