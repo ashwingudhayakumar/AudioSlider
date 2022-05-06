@@ -9,10 +9,21 @@
         body {
             margin: 0;
             height: 0px;
+            background-color: lightpink;
         }
 
         .dragging {
             opacity: 0.5;
+        }
+
+        .hoverDiv {
+            position: absolute;
+            height: 50px;
+            background-color: rgb(51 51 51 / 63%);
+        }
+
+        .all-scroll {
+            cursor: all-scroll;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
@@ -21,50 +32,55 @@
 
 <body>
 
-
 </body>
 
 </html>
 
 <script>
 
-    $(document).ready(function () {
+    class AudioSlider {
+        constructor(initialMinCheckBoolean, initialMaxCheckBoolean) {
+            this.minCheckBoolean = initialMinCheckBoolean;
+            this.maxCheckBoolean = initialMaxCheckBoolean;
+            this.originalAudio;
+            this.minimumGap;
+            this.playPauseCount;
+        }
 
-        var Blob;
+        createElement(specified) {
+            return document.createElement(specified);
 
-        function createButton() {
+        }
+
+        createButton() {
             return document.createElement('button');
         }
 
-        function setInnerHTML(element, content) {
+        setInnerHTML(element, content) {
             element.innerHTML = content;
         }
 
-        function setIdAttribute(element, name) {
+        setIdAttribute(element, name) {
             element.setAttribute("id", name);
         }
 
-        function setTypeAttribute(element, filetype) {
+        setTypeAttribute(element, filetype) {
             element.setAttribute("type", filetype);
         }
 
-        function appendToBody(element) {
+        appendToBody(element) {
             document.body.append(element);
         }
 
-        function setBackgroundColor(element, color) {
+        setBackgroundColor(element, color) {
             element.style.color = color;
         }
 
-        function createElement(specificity) {
-            return document.createElement(specificity);
-        }
-
-        function appendTo(parent, child) {
+        appendToParent(parent, child) {
             parent.appendChild(child);
         }
 
-        function audioBaseSliderAttributeSet(element, backgroundColor, position, marginTop, height, width, left) {
+        audioBaseSliderAttributeSet(element, backgroundColor, position, marginTop, height, width, left) {
             element.style.backgroundColor = backgroundColor;
             element.style.position = position;
             element.style.marginTop = marginTop;
@@ -73,7 +89,7 @@
             element.style.left = left;
         }
 
-        function audioRangeSliderAttributeSet(element, backgroundColor, position, paddingTop, paddingBottom, left, top) {
+        audioRangeSliderAttributeSet(element, backgroundColor, position, paddingTop, paddingBottom, left, top) {
             element.style.backgroundColor = backgroundColor;
             element.style.position = position;
             element.style.paddingTop = paddingTop;
@@ -83,320 +99,469 @@
 
         }
 
-        function labelSet(element, position, top, left) {
+        labelSet(element, position, top, left) {
             element.style.position = position;
             element.style.top = top;
             element.style.left = left;
         }
 
-        function insertAfter(newNode, referenceNode) {
+        insertAfter(newNode, referenceNode) {
             referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
         };
 
-        function flooring(arg) {
+        flooring(arg) {
             return Math.floor(arg);
         }
 
+        setDraggableAttribute(element) {
+            element.setAttribute("draggable", true);
+        }
 
-        var input = document.createElement('input');
-        setTypeAttribute(input, 'file');
-        setIdAttribute(input, "upload");
-        appendToBody(input);
+        setInnerText(element, string) {
+            element.innerText = string;
+        }
 
-        const audioSliderBase = createElement('div');
-        audioSliderBase.setAttribute("id", 'audioSliderBased');
+        setWidth(element, amount) {
+            element.style.width = `${amount}px`;
+        }
 
-        const minRangeOfAudioSlider = createElement('p');
-        minRangeOfAudioSlider.setAttribute("draggable", true);
-        minRangeOfAudioSlider.innerText = "";
-        minRangeOfAudioSlider.style.width="10px";
-        minRangeOfAudioSlider.setAttribute("id", 'minimumRangeOfAudioSlider');
-        appendTo(audioSliderBase, minRangeOfAudioSlider);
-
-        const maxRangeOfAudioSlider = createElement('p');
-        maxRangeOfAudioSlider.setAttribute("draggable", true);
-        maxRangeOfAudioSlider.innerText = "";
-        maxRangeOfAudioSlider.style.width="10px";
-        maxRangeOfAudioSlider.setAttribute("id", 'maximumRangeOfAudioSlider');
-        appendTo(audioSliderBase, maxRangeOfAudioSlider);
-
-        const minRangeAudioLabel = createElement('label');
-        minRangeAudioLabel.setAttribute("draggable", true);
-        minRangeAudioLabel.setAttribute("id", "minimumRangeAudioLabel");
-        appendTo(audioSliderBase, minRangeAudioLabel);
-
-        const maxRangeAudioLabel = createElement('label');
-        maxRangeAudioLabel.setAttribute("draggable", true);
-        maxRangeAudioLabel.setAttribute("id", "maximumRangeAudioLabel");
-        appendTo(audioSliderBase, maxRangeAudioLabel);
-
-        var minimum_gap = 1;
+        creatingRequiredElements() {
 
 
-        document.getElementById("upload").addEventListener("change", function (event) {
+            this.input = this.createElement('input');
+            this.setTypeAttribute(this.input, 'file');
+            this.setIdAttribute(this.input, "upload");
+            this.appendToBody(this.input);
 
-            if ($('#originalAudio')) {
-                $('#originalAudio').remove();
-                $('#submit').remove();
+            this.audioSliderBase = this.createElement('div');
+            this.setIdAttribute(this.audioSliderBase, 'audioSliderBased');
 
+            this.minRangeOfAudioSlider = this.createElement('p');
+            this.setDraggableAttribute(this.minRangeOfAudioSlider);
+            this.setInnerText(this.minRangeOfAudioSlider, "");
+            this.setWidth(this.minRangeOfAudioSlider, 10);
+            this.setIdAttribute(this.minRangeOfAudioSlider, 'minimumRangeOfAudioSlider');
+            this.appendToParent(this.audioSliderBase, this.minRangeOfAudioSlider);
 
-            }
+            this.maxRangeOfAudioSlider = this.createElement('p');
+            this.setDraggableAttribute(this.maxRangeOfAudioSlider);
+            this.setInnerText(this.maxRangeOfAudioSlider, "");
+            this.setWidth(this.maxRangeOfAudioSlider, 10);
+            this.setIdAttribute(this.maxRangeOfAudioSlider, 'maximumRangeOfAudioSlider');
+            this.appendToParent(this.audioSliderBase, this.maxRangeOfAudioSlider);
 
-            var minCheckBoolean = false;
-            var maxCheckBoolean = false;
+            this.minRangeAudioLabel = this.createElement('label');
+            this.setDraggableAttribute(this.minRangeAudioLabel);
+            this.setIdAttribute(this.minRangeAudioLabel, "minimumRangeAudioLabel");
+            this.appendToParent(this.audioSliderBase, this.minRangeAudioLabel);
 
+            this.maxRangeAudioLabel = this.createElement('label');
+            this.setDraggableAttribute(this.maxRangeAudioLabel);
+            this.setIdAttribute(this.maxRangeAudioLabel, "maximumRangeAudioLabel");
+            this.appendToParent(this.audioSliderBase, this.maxRangeAudioLabel);
 
-            var originalAudio = createElement('audio');
-            originalAudio.setAttribute("id", "originalAudio");
-            insertAfter(originalAudio, document.getElementById("upload"));
-            originalAudio.setAttribute("src", URL.createObjectURL(event.target.files[0]));
-            originalAudio.setAttribute("controls", true);
-            originalAudio.style.display = "flex";
-            originalAudio.load();
-
-            originalAudio.onloadedmetadata = function () {
-
-
-                audioBaseSliderAttributeSet(audioSliderBase, "rgb(51 51 51 / 63%)", 'absolute', '4rem', '50px', '500px', '50px');
-                audioRangeSliderAttributeSet(minRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '0px', '-21px');
-                audioRangeSliderAttributeSet(maxRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '500px', '-21px');
-                labelSet(minRangeAudioLabel, 'absolute', '-30px', '0px');
-                labelSet(maxRangeAudioLabel, 'absolute', '-30px', '500px');
-                document.body.append(audioSliderBase);
-                minRangeAudioLabel.innerText = "0:00";
-                maxRangeAudioLabel.innerText = `${flooring(originalAudio.duration / 60)}:${flooring(originalAudio.duration % 60)}`;
-                minimum_gap = 0.1 * (originalAudio.duration);
-
-
-
-
-
-                minRangeOfAudioSlider.addEventListener('dragstart', () => {
-                    minRangeOfAudioSlider.classList.add('dragging');
-                    minRangeAudioLabel.classList.add('dragging');
-                })
-
-                minRangeOfAudioSlider.addEventListener('dragend', () => {
-                    minRangeOfAudioSlider.classList.remove('dragging');
-                    minRangeAudioLabel.classList.remove('dragging');
-                })
-
-                maxRangeOfAudioSlider.addEventListener('dragstart', () => {
-
-                    maxRangeOfAudioSlider.classList.add('dragging');
-                    maxRangeAudioLabel.classList.add('dragging');
-                })
-
-                maxRangeOfAudioSlider.addEventListener('dragend', () => {
-                    maxRangeOfAudioSlider.classList.remove('dragging');
-                    maxRangeAudioLabel.classList.remove('dragging');
-
-                })
-
-                audioSliderBase.addEventListener('dragover', event => {
-
-
-                    if (minRangeOfAudioSlider.classList.value.includes('dragging')) {
-                        if (parseInt((getComputedStyle(maxRangeOfAudioSlider)).left) - parseInt((event.clientX - 50)) >= minimum_gap) {
-                            if (event.clientX - 50 >= 500) {
-                                minRangeOfAudioSlider.style.left = '500px';
-                                minRangeAudioLabel.style.left = '500px';
-                                minRangeAudioLabel.innerText = `${flooring(originalAudio.duration / 60)}:${flooring(originalAudio.duration % 60)}`;
-                            }
-                            else {
-                                minRangeOfAudioSlider.style.left = `${event.clientX - 50}px`;
-                                minRangeAudioLabel.style.left = `${event.clientX - 50}px`;
-                                var percentage = parseInt(getComputedStyle(minRangeAudioLabel).left) / 500;
-                                var currAudioDuration = percentage * (originalAudio.duration);
-                                minRangeAudioLabel.innerText = `${flooring(currAudioDuration / 60)}:${flooring(currAudioDuration % 60)}`;
-                            }
-                        }
-                    }
-                    else if (maxRangeOfAudioSlider.classList.value.includes('dragging')) {
-
-
-                        if (parseInt((event.clientX - 50) - parseInt((getComputedStyle(minRangeOfAudioSlider)).left)) >= minimum_gap) {
-                            if (event.clientX - 50 >= 500) {
-                                maxRangeOfAudioSlider.style.left = '500px';
-                                maxRangeAudioLabel.style.left = '500px';
-                                maxRangeAudioLabel.innerText = `${flooring(originalAudio.duration / 60)}:${flooring(originalAudio.duration % 60)}`;
-                            }
-                            else {
-                                maxRangeOfAudioSlider.style.left = `${event.clientX - 50}px`;
-                                maxRangeAudioLabel.style.left = `${event.clientX - 50}px`;
-                                var percentage = parseInt(getComputedStyle(maxRangeAudioLabel).left) / 500;
-                                var currAudioDuration = percentage * (originalAudio.duration);
-                                maxRangeAudioLabel.innerText = `${flooring(currAudioDuration / 60)}:${flooring(currAudioDuration % 60)}`;
-                            }
-                        }
-                    }
-                })
-
-
-                document.getElementById('minimumRangeOfAudioSlider').addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    minCheckBoolean = true;
-                    maxCheckBoolean = false;
-                })
-                document.getElementById('maximumRangeOfAudioSlider').addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    maxCheckBoolean = true;
-                    minCheckBoolean = false;
-                })
-                document.getElementById('audioSliderBased').addEventListener('click', function (e) {
-                    if (minCheckBoolean) {
-
-                        if (parseInt((getComputedStyle(maxRangeOfAudioSlider)).left) - parseInt((e.clientX - 50)) >= minimum_gap) {
-                            $('#minimumRangeOfAudioSlider').animate({ left: `${e.clientX - 50}px` });
-                            $('#minimumRangeAudioLabel').animate({ left: `${e.clientX - 50}px` },
-                                {
-                                    complete: function () {
-                                        var percentage = parseInt(getComputedStyle(minRangeAudioLabel).left) / 500;
-                                        var currAudioDuration = percentage * (originalAudio.duration);
-                                        minRangeAudioLabel.innerText = `${flooring(currAudioDuration / 60)}:${flooring(currAudioDuration % 60)}`;
-                                    }
-                                });
-                        }
-                    }
-                    if (maxCheckBoolean) {
-                        if (parseInt((e.clientX - 50)) - parseInt((getComputedStyle(minRangeOfAudioSlider)).left) >= minimum_gap) {
-                            $('#maximumRangeOfAudioSlider').animate({ left: `${e.clientX - 50}px` });
-                            $('#maximumRangeAudioLabel').animate({ left: `${e.clientX - 50}px` }, {
-                                complete: function () {
-                                    var percentage = parseInt(getComputedStyle(maxRangeAudioLabel).left) / 500;
-                                    var currAudioDuration = percentage * (originalAudio.duration);
-                                    maxRangeAudioLabel.innerText = `${flooring(currAudioDuration / 60)}:${flooring(currAudioDuration % 60)}`;
-                                }
-                            });
-                        }
-                    }
-                }
-                )
-
-                var submitButton = createElement('button');
-                submitButton.style.position = "absolute";
-                submitButton.style.top = "200px";
-                submitButton.style.left = "280px";
-                submitButton.innerText = "Submit";
-                submitButton.setAttribute("id", 'submit');
-                document.body.append(submitButton);
-
-
-
-
-                console.log(originalAudio.src);
-
-
-
-
-                fetch(originalAudio.src).then(function (response) {
-                    if (response.ok) {
-                        return response.blob();
-                    }
-                    throw new Error('Network response was not ok.');
-                }).then(function (blob) {
-                    Blob = blob;
-                }).catch(function (error) {
-                    console.log('There has been a problem with your fetch operation: ', error);
-                });
-
-
-                document.getElementById('submit').addEventListener('click', function (e) {
-                    if (document.getElementById('trimmedAudio')) {
-                        document.getElementById('trimmedAudio').remove();
-                        document.getElementById('trimmedAudiolabel').remove();
-                    }
-                    var minArray = document.getElementById('minimumRangeAudioLabel').innerText.split(":")
-                    var maxArray = document.getElementById('maximumRangeAudioLabel').innerText.split(":")
-
-                    var startValue = ((parseInt(minArray[0]) * 60) + parseInt(minArray[1]));
-                    var endValue = ((parseInt(maxArray[0]) * 60) + parseInt(maxArray[1]));
-                    if (startValue > endValue) {
-                        window.alert("Start value must be less than end value");
-                    }
-                    else if (startValue === endValue) {
-                        window.alert("both can't be in same time");
-                    }
-                    else {
-                        var wholeDuration = originalAudio.duration;
-                        wholeDuration = Math.floor(wholeDuration);
-                        console.log(startValue, endValue, wholeDuration, Blob.size, Math.floor((startValue * Blob.size) / wholeDuration), Math.floor((endValue * Blob.size) / wholeDuration));
-                        var trimmedAudioBlob;
-                        if (startValue === 0) {
-                            startValue = 1;
-                            endValue += 1;
-                            console.log(startValue);
-                            trimmedAudioBlob = Blob.slice(Math.floor((startValue * Blob.size) / wholeDuration), Math.floor((endValue * Blob.size) / wholeDuration), Blob.type);
-                        }
-                        else {
-                            if (startValue === 1) {
-                                startValue = 1;
-                                endValue += 1;
-                            }
-                            if (startValue > 1) {
-                                startValue -= 1;
-                                endValue += 1;
-                            }
-
-
-                            trimmedAudioBlob = Blob.slice(Math.floor((startValue * Blob.size) / wholeDuration), Math.floor((endValue * Blob.size) / wholeDuration), Blob.type);
-                        }
-                        var trimmedAudio = new Audio();
-                        trimmedAudio.setAttribute("id", 'trimmedAudio');
-                        trimmedAudio.src = window.URL.createObjectURL(trimmedAudioBlob);
-                        trimmedAudio.controls = true;
-                        trimmedAudio.style.position = "absolute";
-                        trimmedAudio.style.top = "300px";
-                        trimmedAudio.style.left = "180px";
-                        document.body.append(trimmedAudio);
-
-                        var trimmedAudioLabel = document.createElement('label');
-                        trimmedAudioLabel.setAttribute("id", 'trimmedAudiolabel');
-                        trimmedAudioLabel.innerHTML = "new audio";
-                        trimmedAudioLabel.style.position = "absolute";
-                        trimmedAudioLabel.style.top = "250px";
-                        trimmedAudioLabel.style.left = "280px";
-                        document.body.append(trimmedAudioLabel);
-
-
-                        var playTrimmedAudio = createButton();
-                        playTrimmedAudio.innerHTML = "Play Trimmed Audio";
-                        playTrimmedAudio.setAttribute('id', 'playTrimmedAudio');
-                        playTrimmedAudio.style.position = "absolute";
-                        playTrimmedAudio.style.top = "400px";
-                        playTrimmedAudio.style.left = "100px";
-                        document.body.append(playTrimmedAudio);
-
-
-                        playTrimmedAudio.addEventListener('click', function () {
-                            document.getElementById('trimmedAudio').play();
-                        })
-
-
-                        var downloadAudio = createButton();
-                        downloadAudio.innerHTML = "Download Trimmed Audio";
-                        downloadAudio.setAttribute('id', 'downloadTrimmedAudio');
-                        downloadAudio.style.position = "absolute";
-                        downloadAudio.style.top = "400px";
-                        downloadAudio.style.left = "400px";
-                        document.body.append(downloadAudio);
-
-                        downloadAudio.addEventListener('click', function () {
-                            const a = Object.assign(document.createElement('a'), { href: document.getElementById('trimmedAudio').src, download: "newAudio.mp3" });
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                        })
-
-                    }
-                }
-                )
-
-
-            }
 
         }
-        );
+
+
+
     }
-    );
+
+    const newAudioSlider = new AudioSlider(1, false, false);
+    newAudioSlider.creatingRequiredElements();
+    newAudioSlider.input.addEventListener("change", function (event) {
+        if ($('#originalAudio')) {
+            $('#originalAudio').remove();
+            $('#submit').remove();
+            if($("#trimmedAudiolabel")){
+                    $('#trimmedAudiolabel').remove();
+                    $('#trimmedAudio').remove();
+                    $('#playTrimmedAudio').remove();
+                    $('#downloadTrimmedAudio').remove();
+
+                }
+        }
+
+        newAudioSlider.originalAudio = newAudioSlider.createElement('audio');
+        newAudioSlider.setIdAttribute(newAudioSlider.originalAudio, "originalAudio");
+        newAudioSlider.insertAfter(newAudioSlider.originalAudio, newAudioSlider.input);
+        newAudioSlider.originalAudio.setAttribute("src", URL.createObjectURL(event.target.files[0]));
+        newAudioSlider.originalAudio.setAttribute("controls", true);
+        newAudioSlider.originalAudio.style.display = "flex";
+        newAudioSlider.originalAudio.load();
+
+
+
+        newAudioSlider.originalAudio.onloadedmetadata = function () {
+
+
+            newAudioSlider.audioBaseSliderAttributeSet(newAudioSlider.audioSliderBase, "rgb(51 51 51 / 63%)", 'absolute', '4rem', '50px', '500px', '50px');
+            newAudioSlider.audioRangeSliderAttributeSet(newAudioSlider.minRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '0px', '-21px');
+            newAudioSlider.audioRangeSliderAttributeSet(newAudioSlider.maxRangeOfAudioSlider, 'red', 'absolute', '25px', '35px', '500px', '-21px');
+            newAudioSlider.labelSet(newAudioSlider.minRangeAudioLabel, 'absolute', '-30px', '0px');
+            newAudioSlider.labelSet(newAudioSlider.maxRangeAudioLabel, 'absolute', '-30px', '500px');
+            document.body.append(newAudioSlider.audioSliderBase);
+            newAudioSlider.minRangeAudioLabel.innerText = "0:00";
+            newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(originalAudio.duration / 60)}:${newAudioSlider.flooring(originalAudio.duration % 60)}`;
+            newAudioSlider.minimumGap = 0.1 * (newAudioSlider.originalAudio.duration);
+
+            fetch(newAudioSlider.originalAudio.src).then(function (response) {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Network response was not ok.');
+            }).then(function (blob) {
+                newAudioSlider.Blob = blob;
+            }).catch(function (error) {
+                console.log('There has been a problem with your fetch operation: ', error);
+            });
+
+            var submitButton = newAudioSlider.createElement('button');
+            submitButton.style.position = "absolute";
+            submitButton.style.top = "200px";
+            submitButton.style.left = "280px";
+            submitButton.innerText = "Submit";
+            submitButton.setAttribute("id", 'submit');
+            document.body.append(submitButton);
+
+
+
+
+            document.getElementById('submit').addEventListener('click', function (e) {
+                if (document.getElementById('trimmedAudio')) {
+                    document.getElementById('trimmedAudio').remove();
+                    document.getElementById('trimmedAudiolabel').remove();
+                }
+                var minArray = document.getElementById('minimumRangeAudioLabel').innerText.split(":")
+                var maxArray = document.getElementById('maximumRangeAudioLabel').innerText.split(":")
+
+                var startValue = ((parseInt(minArray[0]) * 60) + parseInt(minArray[1]));
+                var endValue = ((parseInt(maxArray[0]) * 60) + parseInt(maxArray[1]));
+                if (startValue > endValue) {
+                    window.alert("Start value must be less than end value");
+                }
+                else if (startValue === endValue) {
+                    window.alert("both can't be in same time");
+                }
+                else {
+                    var wholeDuration = newAudioSlider.originalAudio.duration;
+                    wholeDuration = Math.floor(wholeDuration);
+                    console.log(startValue, endValue, wholeDuration, Blob.size, Math.floor((startValue * Blob.size) / wholeDuration), Math.floor((endValue * Blob.size) / wholeDuration));
+                    var trimmedAudioBlob;
+                    if (startValue === 0) {
+                        startValue = 1;
+                        endValue += 1;
+                        console.log(startValue);
+                        trimmedAudioBlob = newAudioSlider.Blob.slice(Math.floor((startValue * newAudioSlider.Blob.size) / wholeDuration), Math.floor((endValue * newAudioSlider.Blob.size) / wholeDuration), newAudioSlider.Blob.type);
+                    }
+                    else {
+                        if (startValue === 1) {
+                            startValue = 1;
+                            endValue += 1;
+                        }
+                        if (startValue > 1) {
+                            startValue -= 1;
+                            endValue += 1;
+                        }
+
+
+                        trimmedAudioBlob = newAudioSlider.Blob.slice(Math.floor((startValue * newAudioSlider.Blob.size) / wholeDuration), Math.floor((endValue * newAudioSlider.Blob.size) / wholeDuration), newAudioSlider.Blob.type);
+                    }
+                    var trimmedAudio = new Audio();
+                    trimmedAudio.setAttribute("id", 'trimmedAudio');
+                    trimmedAudio.src = window.URL.createObjectURL(trimmedAudioBlob);
+                    trimmedAudio.controls = true;
+                    trimmedAudio.style.position = "absolute";
+                    trimmedAudio.style.top = "300px";
+                    trimmedAudio.style.left = "180px";
+                    document.body.append(trimmedAudio);
+
+                    var trimmedAudioLabel = document.createElement('label');
+                    trimmedAudioLabel.setAttribute("id", 'trimmedAudiolabel');
+                    trimmedAudioLabel.innerHTML = "new audio";
+                    trimmedAudioLabel.style.position = "absolute";
+                    trimmedAudioLabel.style.top = "250px";
+                    trimmedAudioLabel.style.left = "280px";
+                    document.body.append(trimmedAudioLabel);
+
+
+                    var playTrimmedAudio = newAudioSlider.createButton();
+
+                    playTrimmedAudio.setAttribute('id', 'playTrimmedAudio');
+                    playTrimmedAudio.innerHTML = "Play Trimmed Audio &#9658";
+                    playTrimmedAudio.style.position = "absolute";
+                    playTrimmedAudio.style.top = "400px";
+                    playTrimmedAudio.style.left = "100px";
+                    document.body.append(playTrimmedAudio);
+
+
+                    playTrimmedAudio.addEventListener('click', function () {
+                        if (!newAudioSlider.playPauseCount) {
+                            playTrimmedAudio.innerHTML = "Pause Trimmed Audio &#9208";
+
+                            trimmedAudio.play();
+                            newAudioSlider.playPauseCount = 1;
+                        }
+                        else {
+                            playTrimmedAudio.innerHTML = "Play Trimmed Audio &#9658";
+                            trimmedAudio.pause();
+                            newAudioSlider.playPauseCount = 0;
+                        }
+                    })
+
+
+                    var downloadAudio = newAudioSlider.createButton();
+                    downloadAudio.innerHTML = "Download Trimmed Audio &#8681";
+                    downloadAudio.setAttribute('id', 'downloadTrimmedAudio');
+                    downloadAudio.style.position = "absolute";
+                    downloadAudio.style.top = "400px";
+                    downloadAudio.style.left = "400px";
+                    document.body.append(downloadAudio);
+
+                    downloadAudio.addEventListener('click', function () {
+                        const a = Object.assign(document.createElement('a'), { href: document.getElementById('trimmedAudio').src, download: "newAudio.mp3" });
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    })
+
+                }
+            }
+            )
+
+
+
+
+
+
+        }
+    })
+
+
+
+    newAudioSlider.minRangeOfAudioSlider.addEventListener('dragstart', () => {
+        newAudioSlider.minRangeOfAudioSlider.classList.add('dragging');
+        newAudioSlider.minRangeAudioLabel.classList.add('dragging');
+    })
+
+    newAudioSlider.minRangeOfAudioSlider.addEventListener('dragend', () => {
+        newAudioSlider.minRangeOfAudioSlider.classList.remove('dragging');
+        newAudioSlider.minRangeAudioLabel.classList.remove('dragging');
+    })
+
+    newAudioSlider.maxRangeOfAudioSlider.addEventListener('dragstart', () => {
+
+        newAudioSlider.maxRangeOfAudioSlider.classList.add('dragging');
+        newAudioSlider.maxRangeAudioLabel.classList.add('dragging');
+    })
+
+    newAudioSlider.maxRangeOfAudioSlider.addEventListener('dragend', () => {
+        newAudioSlider.maxRangeOfAudioSlider.classList.remove('dragging');
+        newAudioSlider.maxRangeAudioLabel.classList.remove('dragging');
+
+    })
+
+    window.addEventListener('dragover', event => {
+
+        var left = parseInt(getComputedStyle(newAudioSlider.minRangeOfAudioSlider).left);
+        var right = parseInt(getComputedStyle(newAudioSlider.maxRangeOfAudioSlider).left);
+        var mid = event.clientX - 50;
+        var midTrue = (mid > left) && (mid < right);
+
+        if (newAudioSlider.minRangeOfAudioSlider.classList.value.includes('dragging')) {
+            if (parseInt((getComputedStyle(newAudioSlider.maxRangeOfAudioSlider)).left) - parseInt((event.clientX - 50)) >= newAudioSlider.minimumGap) {
+                if (event.clientX - 50 >= 500) {
+                    newAudioSlider.minRangeOfAudioSlider.style.left = '500px';
+                    newAudioSlider.minRangeAudioLabel.style.left = '500px';
+                    newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(newAudioSlider.originalAudio.duration / 60)}:${newAudioSlider.flooring(newAudioSlider.originalAudio.duration % 60)}`;
+                }
+                else if (event.clientX - 50 <= 0) {
+                    newAudioSlider.minRangeOfAudioSlider.style.left = '0px';
+                    newAudioSlider.minRangeAudioLabel.style.left = '0px';
+                    newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(0 / 60)}:${newAudioSlider.flooring(0 % 60)}`;
+                }
+                else {
+                    newAudioSlider.minRangeOfAudioSlider.style.left = `${event.clientX - 50}px`;
+                    newAudioSlider.minRangeAudioLabel.style.left = `${event.clientX - 50}px`;
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.minRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+                }
+            }
+        }
+        else if (newAudioSlider.maxRangeOfAudioSlider.classList.value.includes('dragging')) {
+            if (parseInt((event.clientX - 50) - parseInt((getComputedStyle(newAudioSlider.minRangeOfAudioSlider)).left)) >= newAudioSlider.minimumGap) {
+                if (event.clientX - 50 >= 500) {
+                    newAudioSlider.maxRangeOfAudioSlider.style.left = '500px';
+                    newAudioSlider.maxRangeAudioLabel.style.left = '500px';
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(newAudioSlider.originalAudio.duration / 60)}:${newAudioSlider.flooring(newAudioSlider.originalAudio.duration % 60)}`;
+                }
+                else if (event.clientX - 50 <= 0) {
+                    newAudioSlider.maxRangeOfAudioSlider.style.left = '0px';
+                    newAudioSlider.maxRangeAudioLabel.style.left = '0px';
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(0 / 60)}:${newAudioSlider.flooring(0 % 60)}`;
+                }
+                else {
+                    newAudioSlider.maxRangeOfAudioSlider.style.left = `${event.clientX - 50}px`;
+                    newAudioSlider.maxRangeAudioLabel.style.left = `${event.clientX - 50}px`;
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.maxRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+                }
+            }
+        }
+
+
+
+    })
+
+    newAudioSlider.minRangeOfAudioSlider.addEventListener('mousedown', function (e) {
+        e.stopPropagation();
+    })
+
+    newAudioSlider.maxRangeOfAudioSlider.addEventListener('mousedown', function (e) {
+        e.stopPropagation();
+    })
+
+
+    newAudioSlider.minRangeOfAudioSlider.addEventListener('click', function (e) {
+        e.stopPropagation();
+        newAudioSlider.minCheckBoolean = true;
+        newAudioSlider.maxCheckBoolean = false;
+    })
+    newAudioSlider.maxRangeOfAudioSlider.addEventListener('click', function (e) {
+        e.stopPropagation();
+        newAudioSlider.maxCheckBoolean = true;
+        newAudioSlider.minCheckBoolean = false;
+    })
+    newAudioSlider.audioSliderBase.addEventListener('click', function (e) {
+        var left = parseInt(getComputedStyle(newAudioSlider.minRangeOfAudioSlider).left);
+        var right = parseInt(getComputedStyle(newAudioSlider.maxRangeOfAudioSlider).left);
+        var mid = e.clientX - 50;
+        var midTrue = (mid > left) && (mid < right);
+
+        if ((e.clientX - 50) < left && !midTrue) {
+
+            $('#minimumRangeOfAudioSlider').animate({ left: `${e.clientX - 50}px` });
+            $('#minimumRangeAudioLabel').animate({ left: `${e.clientX - 50}px` },
+                {
+                    complete: function () {
+                        var percentage = parseInt(getComputedStyle(newAudioSlider.minRangeAudioLabel).left) / 500;
+                        var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                        newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+                    }
+                });
+
+        }
+
+        else if ((e.clientX - 50) > right && !midTrue) {
+
+            $('#maximumRangeOfAudioSlider').animate({ left: `${e.clientX - 50}px` });
+            $('#maximumRangeAudioLabel').animate({ left: `${e.clientX - 50}px` }, {
+                complete: function () {
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.maxRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+                }
+            });
+
+
+        }
+
+
+
+
+
+    }
+    )
+
+    newAudioSlider.audioSliderBase.addEventListener('mousedown', function (e) {
+
+        var left = parseInt(getComputedStyle(newAudioSlider.minRangeOfAudioSlider).left);
+        var right = parseInt(getComputedStyle(newAudioSlider.maxRangeOfAudioSlider).left);
+        var mid = e.clientX - 50;
+        var midTrue = (mid > left) && (mid < right);
+
+
+
+
+
+        if (midTrue) {
+
+            $(this).css({ 'cursor': 'all-scroll' });
+
+
+            var hoverDiv = newAudioSlider.createElement('div');
+            console.log(hoverDiv);
+            hoverDiv.classList.add("hoverDiv");
+            hoverDiv.style.width = `${parseInt((getComputedStyle(newAudioSlider.maxRangeAudioLabel).left)) - parseInt((getComputedStyle(newAudioSlider.minRangeAudioLabel).left)) - 9}px`;
+            hoverDiv.style.left = `${parseInt((getComputedStyle(newAudioSlider.minRangeAudioLabel).left)) + 9}px`;
+            newAudioSlider.setIdAttribute(hoverDiv, "hoverDiv");
+
+            newAudioSlider.audioSliderBase.append(hoverDiv);
+
+            var currentEventClientX = e.clientX;
+            var currentMinLeft = parseInt(getComputedStyle(newAudioSlider.minRangeAudioLabel).left);
+            var currentMaxLeft = parseInt(getComputedStyle(newAudioSlider.maxRangeAudioLabel).left);
+            var currentHoverLeft = parseInt((getComputedStyle(newAudioSlider.minRangeAudioLabel).left)) + 9;
+
+
+
+            window.addEventListener('mousemove', mousemoveEvent, true);
+
+
+            function mousemoveEvent(event) {
+
+
+                if (event.clientX < currentEventClientX && (currentMinLeft - (currentEventClientX - event.clientX) >= 0)) {
+
+                    newAudioSlider.minRangeOfAudioSlider.style.left = `${currentMinLeft - (currentEventClientX - event.clientX)}px`;
+                    newAudioSlider.minRangeAudioLabel.style.left = `${currentMinLeft - (currentEventClientX - event.clientX)}px`;
+                    hoverDiv.style.left = `${currentHoverLeft - (currentEventClientX - event.clientX)}px`;
+
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.minRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+
+                    newAudioSlider.maxRangeOfAudioSlider.style.left = `${currentMaxLeft - (currentEventClientX - event.clientX)}px`;
+                    newAudioSlider.maxRangeAudioLabel.style.left = `${currentMaxLeft - (currentEventClientX - event.clientX)}px`;
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.maxRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+                }
+
+                else if (event.clientX > currentEventClientX && (currentMaxLeft + (-currentEventClientX + event.clientX) <= 500)) {
+
+                    newAudioSlider.minRangeOfAudioSlider.style.left = `${currentMinLeft + (-currentEventClientX + event.clientX)}px`;
+                    newAudioSlider.minRangeAudioLabel.style.left = `${currentMinLeft + (-currentEventClientX + event.clientX)}px`;
+                    hoverDiv.style.left = `${currentHoverLeft + (-currentEventClientX + event.clientX)}px`;
+
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.minRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.minRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+
+                    newAudioSlider.maxRangeOfAudioSlider.style.left = `${currentMaxLeft + (-currentEventClientX + event.clientX)}px`;
+                    newAudioSlider.maxRangeAudioLabel.style.left = `${currentMaxLeft + (-currentEventClientX + event.clientX)}px`;
+                    var percentage = parseInt(getComputedStyle(newAudioSlider.maxRangeAudioLabel).left) / 500;
+                    var currAudioDuration = percentage * (newAudioSlider.originalAudio.duration);
+                    newAudioSlider.maxRangeAudioLabel.innerText = `${newAudioSlider.flooring(currAudioDuration / 60)}:${newAudioSlider.flooring(currAudioDuration % 60)}`;
+
+                }
+
+
+            }
+            window.addEventListener('mouseup', () => {
+                if (document.getElementById("hoverDiv"))
+                {
+                    document.getElementById("hoverDiv").remove();
+                }
+                    window.removeEventListener("mousemove", mousemoveEvent, true);
+                    $(this).css({ 'cursor': 'auto' });
+                }
+                )
+            }
+        }
+    )
+
+
 </script>
